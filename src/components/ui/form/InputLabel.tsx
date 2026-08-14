@@ -1,16 +1,28 @@
-type Props = {
+type InputLabelProps = {
     label: string;
     required?: boolean;
+    inputId: string;
 };
 
-const InputLabel = ({ label, required }: Props) => {
+function InputLabel({
+    label,
+    required = false,
+    inputId,
+}: InputLabelProps) {
     return (
-        <label className="mb-2 text-black">
+        <label
+            htmlFor={inputId}
+            className="pb-2 text-black"
+        >
             {label}
 
-            {required && <span className="ml-1 text-red-500">*</span>}
+            {required && (
+                <span className="ml-1 text-red-500">
+                    *
+                </span>
+            )}
         </label>
     );
-};
+}
 
 export default InputLabel;

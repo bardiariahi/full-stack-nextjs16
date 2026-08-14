@@ -7,9 +7,12 @@ type UseFormFieldProps = {
 
 export function useFormField({ id }: UseFormFieldProps = {}) {
     const { field, fieldState } = useFieldContext();
+
     const generatedId = useId();
-    const inputId = id ?? field.name ?? generatedId;
-    const hasError = fieldState.invalid;
+
+    const inputId = id ?? generatedId;
+
+    const hasError = !!fieldState.error;
 
     return {
         field,

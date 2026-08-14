@@ -1,40 +1,35 @@
-import { 
-    createContext,
-    useContext
-} from "react";
 
-import {
+import { createContext, useContext } from "react";
+
+import type {
     ControllerFieldState,
     ControllerRenderProps,
+    FieldValues,
+    Path,
 } from "react-hook-form";
 
-
-type FieldContextType = {
-    field: ControllerRenderProps<any>;
+export type FieldContextType = {
+    field: ControllerRenderProps<FieldValues, string>;
     fieldState: ControllerFieldState;
 };
 
+const FieldContext = createContext<FieldContextType | null>(null);
 
-const FieldContext =
-    createContext<FieldContextType | null>(null);
+export function useFieldContext<
+    T extends FieldValues = FieldValues,
+>() {
+    const context = useContext(FieldContext);
 
-
-
-export function useFieldContext(){
-
-    const context =
-        useContext(FieldContext);
-
-
-    if(!context){
+    if (!context) {
         throw new Error(
-            "useFieldContext must be used inside FormField"
+            "useFieldContext must be used inside FormField",
         );
     }
 
-
-    return context;
+    return context as unknown as {
+        field: ControllerRenderProps<T, Path<T>>;
+        fieldState: ControllerFieldState;
+    };
 }
-
 
 export default FieldContext;
