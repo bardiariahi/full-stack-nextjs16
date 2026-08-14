@@ -1,23 +1,20 @@
-
 import { createContext, useContext } from "react";
 
 import type {
     ControllerFieldState,
     ControllerRenderProps,
     FieldValues,
-    Path,
 } from "react-hook-form";
 
-export type FieldContextType = {
+type FieldContextType = {
     field: ControllerRenderProps<FieldValues, string>;
     fieldState: ControllerFieldState;
 };
 
-const FieldContext = createContext<FieldContextType | null>(null);
+const FieldContext =
+    createContext<FieldContextType | null>(null);
 
-export function useFieldContext<
-    T extends FieldValues = FieldValues,
->() {
+export function useFieldContext() {
     const context = useContext(FieldContext);
 
     if (!context) {
@@ -26,10 +23,7 @@ export function useFieldContext<
         );
     }
 
-    return context as unknown as {
-        field: ControllerRenderProps<T, Path<T>>;
-        fieldState: ControllerFieldState;
-    };
+    return context;
 }
 
 export default FieldContext;

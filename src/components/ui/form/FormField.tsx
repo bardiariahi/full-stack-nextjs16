@@ -1,12 +1,19 @@
-import { useController, useFormContext } from "react-hook-form";
+import { useId } from "react";
 
-import type { FieldValues, Path } from "react-hook-form";
+import {
+    useController,
+    useFormContext,
+} from "react-hook-form";
+
+import type {
+    FieldValues,
+    Path,
+} from "react-hook-form";
 
 import ErrorMessage from "./ErrorMessage";
 import FieldContext from "./FieldContext";
 import HintMessage from "./HintMessage";
 import InputLabel from "./InputLabel";
-import { useId } from "react";
 
 type FormFieldProps<T extends FieldValues> = {
     name: Path<T>;
@@ -23,7 +30,8 @@ function FormField<T extends FieldValues>({
     hint,
     children,
 }: FormFieldProps<T>) {
-    const id = useId()
+    const id = useId();
+
     const { control } = useFormContext<T>();
 
     const { field, fieldState } = useController({
@@ -36,7 +44,7 @@ function FormField<T extends FieldValues>({
     return (
         <FieldContext.Provider
             value={{
-                field,
+                field: field as never,
                 fieldState,
             }}
         >
@@ -44,8 +52,9 @@ function FormField<T extends FieldValues>({
                 {label && (
                     <InputLabel
                         label={label}
-                        required={required} inputId={id}
-                        />
+                        required={required}
+                        inputId={id}
+                    />
                 )}
 
                 {children}

@@ -6,12 +6,12 @@ import { FaEye, FaKey, FaUser } from "react-icons/fa6";
 import Button from "../../ui/button/Button";
 import Form from "../../ui/form/Form";
 import FormField from "../../ui/form/FormField";
-import Input from "../../ui/inputs/Input";
-import LoginTitle from "./LoginTitle";
-
-import PasswordRequirements from "../../ui/inputs/PasswordRequirements";
-import { loginSchema, type LoginFormValues } from "./login.schema";
 import Checkbox from "../../ui/inputs/Checkbox";
+import Input from "../../ui/inputs/Input";
+import PasswordRequirements from "../../ui/inputs/PasswordRequirements";
+
+import LoginTitle from "./LoginTitle";
+import { loginSchema, type LoginFormValues } from "./login.schema";
 
 const LoginForm = () => {
     const methods = useForm<LoginFormValues>({
@@ -30,6 +30,8 @@ const LoginForm = () => {
     const showAndHidePassword = () => {
         setFieldType((prev) => (prev === "password" ? "text" : "password"));
     };
+
+    const password = methods.watch("password");
 
     const passwordIcon = (
         <span aria-hidden="true">
@@ -55,18 +57,15 @@ const LoginForm = () => {
         </button>
     );
 
-    const password = methods.watch("password");
+    const handleSubmit = (data: LoginFormValues) => {
+        console.log(data);
+    };
 
     return (
         <div>
             <LoginTitle title="Dashboard Login" />
 
-            <Form
-                methods={methods}
-                onSubmit={(data) => {
-                    console.log(data);
-                }}
-            >
+            <Form methods={methods} onSubmit={handleSubmit}>
                 <FormField<LoginFormValues> name="email" label="Email" required>
                     <Input
                         placeholder="Email"
@@ -86,16 +85,17 @@ const LoginForm = () => {
                         type={fieldType}
                         leftAdornment={passwordIcon}
                         rightAdornment={passwordBtn}
-                        autoComplete="new-password"
+                        autoComplete="current-password"
                     />
 
                     <PasswordRequirements value={password} />
                 </FormField>
 
-                <Button type="submit">Login</Button>
                 <FormField<LoginFormValues> name="rememberMe">
                     <Checkbox label="Remember me" />
                 </FormField>
+
+                <Button type="submit">Login</Button>
             </Form>
         </div>
     );
