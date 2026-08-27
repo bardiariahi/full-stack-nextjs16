@@ -1,12 +1,10 @@
-import { passwordRules } from "../../dashboard/login/password.rules";
+import { passwordRules } from "../../auth/login/password.rules";
 
 type PasswordRequirementsProps = {
     value: string;
 };
 
-function PasswordRequirements({
-    value,
-}: PasswordRequirementsProps) {
+function PasswordRequirements({ value }: PasswordRequirementsProps) {
     return (
         <div className="mt-2 flex flex-col gap-1">
             {passwordRules.map((rule) => {
@@ -15,11 +13,7 @@ function PasswordRequirements({
                 return (
                     <p
                         key={rule.key}
-                        className={
-                            isValid
-                                ? "text-green-600"
-                                : "text-gray-500"
-                        }
+                        className={isValid ? "text-green-600" : "text-gray-500"}
                     >
                         {isValid ? "✓" : "○"} {rule.label}
                     </p>

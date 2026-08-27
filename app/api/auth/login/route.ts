@@ -1,23 +1,21 @@
-import { comparePassword } from "@/src/lib/auth/password";
-import { createSession } from "@/src/lib/auth/session";
-import { prisma } from "@/src/lib/prisma";
-import { loginSchema } from "@/src/schemas/auth/login.schema";
-import { cookies } from "next/headers";
+import crypto from "crypto";
+
+import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+
+import { prisma } from "@/src/lib/prisma";
 
 export async function POST(request: Request) {
     try {
-        // 1. دریافت اطلاعات از Frontend
+        // 1. Get email and password
         const body = await request.json();
 
-        // 2. Validation با Zod
-        const result = loginSchema.safeParse(body);
+        const { email, password, rememberMe } = body;
 
-        if (!result.success) {
+        if (!email || !password) {
             return NextResponse.json(
                 {
-                    message: "Invalid input",
-                    errors: result.error.flatten(),
+                    message: "Email and password are required",
                 },
                 {
                     status: 400,
@@ -25,21 +23,14 @@ export async function POST(request: Request) {
             );
         }
 
-        // 3. چون validation موفق شده،
-        // result.data تایپ درست LoginFormValues را دارد
-        const { email, password, rememberMe } = result.data;
-
-        // فعلاً rememberMe را استفاده نکردیم
-        console.log(rememberMe);
-
-        // 4. پیدا کردن User
+        // 2. Find user
         const user = await prisma.user.findUnique({
             where: {
                 email,
             },
         });
 
-        // 5. User وجود ندارد
+        // 3. User does not exist
         if (!user) {
             return NextResponse.json(
                 {
@@ -51,13 +42,12 @@ export async function POST(request: Request) {
             );
         }
 
-        // 6. بررسی Password
-        const isPasswordValid = await comparePassword(
+        // 4. Check password
+        const isPasswordValid = await bcrypt.compare(
             password,
             user.passwordHash,
         );
 
-        // 7. Password اشتباه است
         if (!isPasswordValid) {
             return NextResponse.json(
                 {
@@ -69,31 +59,82 @@ export async function POST(request: Request) {
             );
         }
 
-        const session = await createSession(user.id, rememberMe);
+        // 5. Check account status
+        if (user.status !== "ACTIVE") {
+            return NextResponse.json(
+                {
+                    message: "Your account is not active",
+                },
+                {
+                    status: 403,
+                },
+            );
+        }
 
-        const cookieStore = await cookies();
-        cookieStore.set("session", session.token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            expires: session.expiresAt,
-            path: "/",
-        });
+        // 6. Generate random session token
+        const token = crypto.randomBytes(32).toString("hex");
 
-        // 8. فعلاً Login موفق شده
-        return NextResponse.json({
-            message: "Login successful",
-            user: {
-                id: user.id,
-                email: user.email,
+        // 7. Hash token before saving it in database
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
+
+        // 8. Session expiration
+        const sessionDuration = rememberMe
+            ? 30 * 24 * 60 * 60 * 1000
+            : 24 * 60 * 60 * 1000;
+
+        const expiresAt = new Date(
+            Date.now() + sessionDuration,
+        );
+
+        // 9. Create session in database
+        await prisma.session.create({
+            data: {
+                userId: user.id,
+                tokenHash,
+                expiresAt,
             },
         });
+
+        // 10. Create response
+        const response = NextResponse.json(
+            {
+                message: "Login successful",
+
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    status: user.status,
+                },
+            },
+            {
+                status: 200,
+            },
+        );
+
+        // 11. Save RAW token in HttpOnly Cookie
+        response.cookies.set("session", token, {
+            httpOnly: true,
+
+            secure:
+                process.env.NODE_ENV === "production",
+
+            sameSite: "lax",
+
+            path: "/",
+
+            expires: expiresAt,
+        });
+
+        return response;
     } catch (error) {
-        console.error("Login error:", error);
+        console.error("LOGIN ERROR:", error);
 
         return NextResponse.json(
             {
-                message: "Internal server error",
+                message: "Something went wrong",
             },
             {
                 status: 500,

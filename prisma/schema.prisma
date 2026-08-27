@@ -7,15 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum ActivationType {
+  MANUAL
+  SYSTEM
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   passwordHash String
 
+  status UserStatus @default(PENDING)
+
+  activeFrom  DateTime?
+  activeUntil DateTime?
+
+  activatedAt     DateTime?
+  activatedById   String?
+  activationType  ActivationType?
+
+  activatedBy User?  @relation("UserActivation", fields: [activatedById], references: [id], onDelete: SetNull)
+  activatedUsers User[] @relation("UserActivation")
+
   sessions Session[]
+  roles    UserRole[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([activeUntil])
 }
 
 model Session {
@@ -29,4 +58,56 @@ model Session {
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([expiresAt])
+}
+
+model Role {
+  id   String @id @default(cuid())
+  name String @unique
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  createdAt DateTime @default(now())
+}
+
+model Permission {
+  id   String @id @default(cuid())
+  name String @unique
+
+  roles RolePermission[]
+
+  createdAt DateTime @default(now())
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  message   String
+
+  userId    String?
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
 }

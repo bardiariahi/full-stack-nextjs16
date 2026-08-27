@@ -1,10 +1,8 @@
-// import MainLogin from "@/src/components/dashboard/login/MainLogin"
+import DashboardPage from "@/src/components/dashboard/dashboard/MainDashboard"
 
 const page = () => {
   return (
-    <div>
-      dashboard
-    </div>
+    <DashboardPage />
   )
 }
 

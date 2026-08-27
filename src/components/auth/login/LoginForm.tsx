@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -10,8 +12,13 @@ import Checkbox from "../../ui/inputs/Checkbox";
 import Input from "../../ui/inputs/Input";
 import PasswordRequirements from "../../ui/inputs/PasswordRequirements";
 
+import { useLogin } from "@/src/hooks/mutations/useLogin";
+
 import LoginTitle from "./LoginTitle";
-import { loginSchema, type LoginFormValues } from "./login.schema";
+import {
+    loginSchema,
+    type LoginFormValues,
+} from "./login.schema";
 
 const LoginForm = () => {
     const methods = useForm<LoginFormValues>({
@@ -27,11 +34,21 @@ const LoginForm = () => {
     const [fieldType, setFieldType] =
         useState<React.HTMLInputTypeAttribute>("password");
 
-    const showAndHidePassword = () => {
-        setFieldType((prev) => (prev === "password" ? "text" : "password"));
-    };
+    const loginMutation = useLogin();
 
     const password = methods.watch("password");
+
+    const showAndHidePassword = () => {
+        setFieldType((prev) =>
+            prev === "password"
+                ? "text"
+                : "password",
+        );
+    };
+
+    const handleSubmit = (data: LoginFormValues) => {
+        loginMutation.mutate(data);
+    };
 
     const passwordIcon = (
         <span aria-hidden="true">
@@ -50,28 +67,35 @@ const LoginForm = () => {
             type="button"
             onClick={showAndHidePassword}
             aria-label={
-                fieldType === "password" ? "Show password" : "Hide password"
+                fieldType === "password"
+                    ? "Show password"
+                    : "Hide password"
             }
+            disabled={loginMutation.isPending}
         >
             <FaEye size={22} />
         </button>
     );
 
-    const handleSubmit = (data: LoginFormValues) => {
-        console.log(data);
-    };
-
     return (
         <div>
             <LoginTitle title="Dashboard Login" />
 
-            <Form methods={methods} onSubmit={handleSubmit}>
-                <FormField<LoginFormValues> name="email" label="Email" required>
+            <Form
+                methods={methods}
+                onSubmit={handleSubmit}
+            >
+                <FormField<LoginFormValues>
+                    name="email"
+                    label="Email"
+                    required
+                >
                     <Input
                         placeholder="Email"
                         type="email"
                         leftAdornment={userIcon}
                         autoComplete="email"
+                        disabled={loginMutation.isPending}
                     />
                 </FormField>
 
@@ -86,16 +110,32 @@ const LoginForm = () => {
                         leftAdornment={passwordIcon}
                         rightAdornment={passwordBtn}
                         autoComplete="current-password"
+                        disabled={loginMutation.isPending}
                     />
 
-                    <PasswordRequirements value={password} />
+                    <PasswordRequirements
+                        value={password}
+                    />
                 </FormField>
 
-                <FormField<LoginFormValues> name="rememberMe">
-                    <Checkbox label="Remember me" />
+                <FormField<LoginFormValues>
+                    name="rememberMe"
+                >
+                    <Checkbox
+                        label="Remember me"
+                    />
                 </FormField>
 
-                <Button type="submit">Login</Button>
+                <Button
+                    type="submit"
+                    disabled={loginMutation.isPending}
+                >
+                    {loginMutation.isPending ? (
+                        <span className="loading loading-ring loading-sm" />
+                    ) : (
+                        "Login"
+                    )}
+                </Button>
             </Form>
         </div>
     );

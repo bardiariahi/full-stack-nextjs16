@@ -29,11 +29,7 @@ const openApiDocument = {
                             schema: {
                                 type: "object",
 
-                                required: [
-                                    "email",
-                                    "password",
-                                    "rememberMe",
-                                ],
+                                required: ["email", "password", "rememberMe"],
 
                                 properties: {
                                     email: {
@@ -73,6 +69,47 @@ const openApiDocument = {
 
                     "500": {
                         description: "Internal server error",
+                    },
+                },
+            },
+        },
+        "/api/dev/create-admin": {
+            post: {
+                tags: ["Dev"],
+                summary: "Create active admin user",
+
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["email", "password"],
+                                properties: {
+                                    email: {
+                                        type: "string",
+                                        format: "email",
+                                        example: "admin@test.com",
+                                    },
+                                    password: {
+                                        type: "string",
+                                        example: "Admin@12345",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+
+                responses: {
+                    201: {
+                        description: "Admin created successfully",
+                    },
+                    409: {
+                        description: "User already exists",
+                    },
+                    500: {
+                        description: "Server error",
                     },
                 },
             },
