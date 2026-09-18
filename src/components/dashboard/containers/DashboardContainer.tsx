@@ -6,7 +6,7 @@ type DCProps = {
 
 const DashboardContainer = ({children}: DCProps) => {
   return (
-    <div className='w-full h-screen bg-gray-100 flex'>{children}</div>
+    <div className='relative flex h-dvh w-full overflow-hidden bg-gray-100'>{children}</div>
   )
 }
 

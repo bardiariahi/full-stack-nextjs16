@@ -12,7 +12,7 @@ const DashboardUser = () => {
             <div className="flex items-center gap-3">
                 <div className="skeleton h-10 w-10 rounded-xl" />
 
-                <div className="hidden space-y-2 sm:block">
+                <div className="hidden space-y-2 lg:block">
                     <div className="skeleton h-3 w-32" />
                     <div className="skeleton h-2 w-16" />
                 </div>
@@ -35,7 +35,7 @@ const DashboardUser = () => {
                     <FaUser size={16} />
                 </div>
 
-                <span className="hidden text-sm text-slate-500 sm:block">
+                <span className="hidden text-sm text-slate-500 lg:block">
                     User unavailable
                 </span>
             </div>
@@ -64,7 +64,7 @@ const DashboardUser = () => {
                 {firstLetter}
             </div>
 
-            <div className="hidden min-w-0 sm:block">
+            <div className="hidden min-w-0 lg:block">
                 <p
                     className="
                         max-w-52
@@ -79,7 +79,7 @@ const DashboardUser = () => {
 
                 <p
                     className="
-                        mt-0.5
+                        mt-0.5 max-w-52 truncate
                         text-xs
                         font-semibold
                         uppercase

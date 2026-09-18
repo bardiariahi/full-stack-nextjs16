@@ -7,7 +7,7 @@ type DCProps = {
 
 const DashboardContent = ({ children }: DCProps) => {
     return (
-        <div className="flex flex-col gap-5 w-full">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <DashboardNavbar />
             {children}
         </div>

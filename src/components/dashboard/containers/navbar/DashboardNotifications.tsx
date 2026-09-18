@@ -76,11 +76,12 @@ const DashboardNotifications = () => {
             {isOpen && (
                 <div
                     className="
-                        absolute
-                        right-0
-                        top-12
+                        fixed
+                        right-3
+                        top-16
+                        sm:absolute sm:right-0 sm:top-12
                         z-50
-                        w-80
+                        w-80 max-w-[calc(100vw-1.5rem)]
                         overflow-hidden
                         rounded-2xl
                         border
@@ -128,7 +129,7 @@ const DashboardNotifications = () => {
 
                     <div
                         className="
-                            max-h-80
+                            max-h-[min(20rem,calc(100dvh-12rem))]
                             overflow-y-auto
                         "
                     >
